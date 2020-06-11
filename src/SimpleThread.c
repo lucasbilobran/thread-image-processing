@@ -48,7 +48,7 @@ void *loadFiles(int argc, char *argv[], Queue *buffer1) {
             // Entra na região crítica
             sem_wait(&mutexBuffer1);
             // Populate buffer 1
-            enqueue(&buffer1, &magick_wand);
+            enqueue(buffer1, &magick_wand);
             sem_post(&mutexBuffer1);
         }
     }
@@ -62,7 +62,7 @@ void *filterOne(Queue *buffer1, Queue *buffer2) {
         // Entra na região crítica
         sem_wait(&mutexBuffer1);
         // Consume buffer 1
-        dequeue(&buffer1, &magick_wand);
+        dequeue(buffer1, &magick_wand);
         sem_post(&mutexBuffer1);
             
         if(magick_wand != NULL)
@@ -76,7 +76,7 @@ void *filterOne(Queue *buffer1, Queue *buffer2) {
                 // Entra na região crítica
                 sem_wait(&mutexBuffer2);
                 // Populate buffer 2
-                enqueue(&buffer2, &magick_wand);
+                enqueue(buffer2, &magick_wand);
                 sem_post(&mutexBuffer2);
             } 
         } 
@@ -93,7 +93,7 @@ void *saveFiles(Queue *buffer2, Queue *buffer3) {
         // Entra na região crítica
         sem_wait(&mutexBuffer2);
         // Consume buffer 2
-        dequeue(&buffer2, &magick_wand);
+        dequeue(buffer2, &magick_wand);
         sem_post(&mutexBuffer2);
             
         // TODO: pesar em como linkar com o nome original das files
@@ -109,7 +109,7 @@ void *saveFiles(Queue *buffer2, Queue *buffer3) {
                 // Entra na região crítica
                 sem_wait(&mutexBuffer3);
                 // Populate buffer 3
-                enqueue(&buffer3, &magick_wand);
+                enqueue(buffer3, &magick_wand);
                 sem_post(&mutexBuffer3);
 
                 i++;
@@ -126,8 +126,8 @@ void *releaseWands(Queue *buffer3){
     while(1) {
         // Entra na região crítica
         sem_wait(&mutexBuffer3);
-        if( !isQueueEmpty(&buffer3) )
-            dequeue(&buffer3, &magick_wand);
+        if( !isQueueEmpty(buffer3) )
+            dequeue(buffer3, &magick_wand);
         sem_post(&mutexBuffer3);
         
         if(magick_wand != NULL)
