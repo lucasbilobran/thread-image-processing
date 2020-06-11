@@ -8,12 +8,17 @@ all: $(SRCDIR)/Filters.c $(SRCDIR)/ResizeAllImages.c $(SRCDIR)/RotateAllImages.c
 	$(CC) -o ResizeAllImages $(SRCDIR)/ResizeAllImages.c -O $(CFLAGS)
 	$(CC) -o RotateAllImages $(SRCDIR)/RotateAllImages.c -O $(CFLAGS)
 
-simpleThread: $(SRCDIR)/SimpleThread.c queue
+simpleThread: SimpleThread.o libqueue.a
+	$(CC) -o SimpleThread SimpleThread.o -L. -libqueue -lm
+
+SimpleThread.o: $(SRCDIR)/SimpleThread.c 
 	$(CC) -o SimpleThread $(SRCDIR)/SimpleThread.c -O $(CFLAGS)
 
-queue: 
-	$(CC) -o $(SRCDIR)/queue.o -c $(SRCDIR)/queue.c
-	$(CC) $(SRCDIR)/SimpleThread.c $(SRCDIR)/queue.o
+libqueue.a: queue.o 
+    ar rcs libqueue.a queue.o
+
+queue.o: queue.c Queue.h
+	$(CC) -O -c $(SRCDIR)/queue.c
 
 sequential: $(SRCDIR)/Sequential.c
 	$(CC) -o Sequential $(SRCDIR)/Sequential.c -O $(CFLAGS)
