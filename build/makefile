@@ -1,6 +1,7 @@
 CC=gcc
 CFLAGS=`GraphicsMagickWand-config --cppflags --ldflags --libs`
 SRCDIR=../src
+OUTPUTDIR=../output
 
 all: $(SRCDIR)/Filters.c $(SRCDIR)/ResizeAllImages.c $(SRCDIR)/RotateAllImages.c
 	$(CC) -o Filters $(SRCDIR)/Filters.c -O $(CFLAGS)
@@ -17,4 +18,4 @@ rotate: $(SRCDIR)/RotateAllImages.c
 	$(CC) -o RotateAllImages $(SRCDIR)/RotateAllImages.c -O $(CFLAGS)
 
 clean:
-	rm Filters ResizeAllImages RotateAllImages
+	rm Filters ResizeAllImages RotateAllImages $(OUTPUTDIR)/*
