@@ -6,6 +6,8 @@
 #include <string.h>
 #include <wand/magick_wand.h>
 
+#define OUTPUTDIR "../output"
+
 int main(int argc, char *argv[])
 {
     MagickWand *magick_wand1, *magick_wand2, *magick_wand3;
@@ -48,20 +50,20 @@ int main(int argc, char *argv[])
         }
 
 
-        // Write output files
-        sprintf(outfile, "output/tipo1-%d.jpg", i);
+        // Write OUTPUTDIR files
+        sprintf(outfile, OUTPUTDIR"/tipo1-%d.jpg", i);
         if (status1 == MagickPass)
         {
             status1 = MagickWriteImage(magick_wand1, outfile);
         }
 
-        sprintf(outfile, "output/tipo2-%d.jpg", i);
+        sprintf(outfile, OUTPUTDIR"/tipo2-%d.jpg", i);
         if (status2 == MagickPass)
         {
             status2 = MagickWriteImage(magick_wand2, outfile);
         }
 
-        sprintf(outfile, "output/tipo3-%d.jpg", i);
+        sprintf(outfile, OUTPUTDIR"/tipo3-%d.jpg", i);
         if (status3 == MagickPass)
         {
             status3 = MagickWriteImage(magick_wand3, outfile);

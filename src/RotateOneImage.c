@@ -6,6 +6,8 @@
 #include <string.h>
 #include <wand/magick_wand.h>
 
+#define OUTPUTDIR "../output"
+
 int main(int argc, char *argv[])
 {
     MagickWand *magick_wand;
@@ -18,7 +20,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    outfile = "output/rotacionada.jpg";
+    outfile = OUTPUTDIR"/rotacionada.jpg";
 
     infile=argv[1];
 

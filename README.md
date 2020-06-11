@@ -1,4 +1,4 @@
-## Copiling
+## Compiling
 gcc File.c -O `GraphicsMagickWand-config --cppflags --ldflags --libs`
 
 # Pré-processamento de Imagens 

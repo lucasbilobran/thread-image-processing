@@ -53,3 +53,9 @@ dkms.conf
 
 # Output files
 output/*
+!output/README.md
+
+# Build files
+build/*
+!build/makefile
+!build/README.md

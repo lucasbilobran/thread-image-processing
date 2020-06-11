@@ -6,6 +6,8 @@
 #include <string.h>
 #include <wand/magick_wand.h>
 
+#define OUTPUTDIR "../output"
+
 int main(int argc, char *argv[])
 {
     MagickWand *magick_wand;
@@ -28,7 +30,7 @@ int main(int argc, char *argv[])
     // For each input image
     for (int i = 1; i < argc; i++) {
         infile=argv[i];
-        sprintf(outfile, "output/rotacionada%d.jpg", i);
+        sprintf(outfile, OUTPUTDIR"/rotacionada%d.jpg", i);
 
         // Read input image file
         if (status == MagickPass)
