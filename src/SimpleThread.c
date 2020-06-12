@@ -15,6 +15,8 @@
 sem_t mutexBuffer1;
 sem_t mutexBuffer2;
 sem_t mutexBuffer3;
+sem_t mutexbufferSave;
+sem_t mutexbufferWand;
 int total;
 
 typedef struct LoadArgs
@@ -30,16 +32,28 @@ typedef struct FilterOneArgs
     Queue *buffer2;
 }filterOneArgs;
 
-typedef struct SaveArgs
+typedef struct FilterTwoArgs
 {
     Queue *buffer2;
     Queue *buffer3;
+}filterTwoArgs;
+
+typedef struct FilterThreeArgs
+{
+    Queue *buffer3;
+    Queue *bufferSave;
+}filterThreeArgs;
+
+typedef struct SaveArgs
+{
+    Queue *bufferSave;
+    Queue *bufferWand;
 }saveArgs;
 
 typedef struct ReleaseArgs
 {
     int argc;
-    Queue *buffer3;
+    Queue *bufferWand;
 }releaseArgs;
 
 void dealWithError(MagickWand *magick_wand) 
@@ -83,9 +97,9 @@ void *loadFiles(void *lA) {
     }
 }
 
-void *filterOne(void *fA) {
-    Queue *buffer1 = ((filterOneArgs *)fA)->buffer1;
-    Queue *buffer2 = ((filterOneArgs *)fA)->buffer2;  
+void *filterOne(void *f1A) {
+    Queue *buffer1 = ((filterOneArgs *)f1A)->buffer1;
+    Queue *buffer2 = ((filterOneArgs *)f1A)->buffer2;  
 
     MagickWand *magick_wand = NULL;
 
@@ -116,9 +130,81 @@ void *filterOne(void *fA) {
     }
 }
 
+void *filterTwo(void *f2A) {
+    Queue *buffer2 = ((filterTwoArgs *)f2A)->buffer2;
+    Queue *buffer3 = ((filterTwoArgs *)f2A)->buffer3;  
+
+    MagickWand *magick_wand = NULL;
+
+    while(1) {
+     
+        // Entra na região crítica
+        sem_wait(&mutexBuffer2);
+        // Consume buffer 2
+        dequeue(buffer2, &magick_wand);
+        sem_post(&mutexBuffer2);
+            
+        if(magick_wand != NULL)
+        {
+            if( MagickSolarizeImage(magick_wand, 0.2) != MagickPass)
+            {
+                dealWithError(magick_wand);
+            }
+            else
+            {
+                // Entra na região crítica
+                sem_wait(&mutexBuffer3);
+                // Populate buffer 3
+                enqueue(buffer3, &magick_wand);
+                sem_post(&mutexBuffer3);
+            } 
+        } 
+        magick_wand = NULL;
+    }
+}
+
+void *filterThree(void *f3A) {
+    Queue *buffer3 = ((filterThreeArgs *)f3A)->buffer3;
+    Queue *bufferSave = ((filterThreeArgs *)f3A)->bufferSave;  
+
+    MagickWand *magick_wand = NULL;
+    PixelWand *background;
+    background=NewPixelWand();
+    PixelSetColor(background,"#000000");
+
+    while(1) {
+     
+        // Entra na região crítica
+        sem_wait(&mutexBuffer3);
+        // Consume buffer 1
+        dequeue(buffer3, &magick_wand);
+        sem_post(&mutexBuffer3);
+            
+        if(magick_wand != NULL)
+        {
+            if( MagickRotateImage(magick_wand,background,30) != MagickPass)
+            {
+                dealWithError(magick_wand);
+            }
+            else
+            {
+                // Entra na região crítica
+                sem_wait(&mutexbufferSave);
+                // Populate buffer 2
+                enqueue(bufferSave, &magick_wand);
+                sem_post(&mutexbufferSave);
+            } 
+        } 
+        
+        magick_wand = NULL;
+    }
+
+    DestroyPixelWand(background);
+}
+
 void *saveFiles(void *sA) {
-    Queue *buffer2 = ((saveArgs *)sA)->buffer2;
-    Queue *buffer3 = ((saveArgs *)sA)->buffer3;  
+    Queue *bufferSave = ((saveArgs *)sA)->bufferSave;
+    Queue *bufferWand = ((saveArgs *)sA)->bufferWand;  
 
     MagickWand *magick_wand = NULL;
     char outfile[512];
@@ -126,10 +212,10 @@ void *saveFiles(void *sA) {
     int i = 1;
     while(1) {
         // Entra na região crítica
-        sem_wait(&mutexBuffer2);
+        sem_wait(&mutexbufferSave);
         // Consume buffer 2
-        dequeue(buffer2, &magick_wand);
-        sem_post(&mutexBuffer2);
+        dequeue(bufferSave, &magick_wand);
+        sem_post(&mutexbufferSave);
             
         // TODO: pesar em como linkar com o nome original das files
         sprintf(outfile, OUTPUTDIR"/img-%d.jpg", i);
@@ -142,10 +228,10 @@ void *saveFiles(void *sA) {
             else
             {
                 // Entra na região crítica
-                sem_wait(&mutexBuffer3);
-                // Populate buffer 3
-                enqueue(buffer3, &magick_wand);
-                sem_post(&mutexBuffer3);
+                sem_wait(&mutexbufferWand);
+                // Populate last buffer 
+                enqueue(bufferWand, &magick_wand);
+                sem_post(&mutexbufferWand);
 
                 i++;
             }
@@ -157,16 +243,16 @@ void *saveFiles(void *sA) {
 
 void *releaseWands(void *rA){
     int argc = ((releaseArgs *)rA)->argc;
-    Queue *buffer3 = ((releaseArgs *)rA)->buffer3;  
+    Queue *bufferWand = ((releaseArgs *)rA)->bufferWand;  
 
     MagickWand *magick_wand = NULL;
     
     while(1) {
         // Entra na região crítica
-        sem_wait(&mutexBuffer3);
-        if( !isQueueEmpty(buffer3) )
-            dequeue(buffer3, &magick_wand);
-        sem_post(&mutexBuffer3);
+        sem_wait(&mutexbufferWand);
+        if( !isQueueEmpty(bufferWand) )
+            dequeue(bufferWand, &magick_wand);
+        sem_post(&mutexbufferWand);
         
         if(magick_wand != NULL){
             DestroyMagickWand(magick_wand);
@@ -193,13 +279,17 @@ int main(int argc, char *argv[])
     sem_init(&mutexBuffer1, 0, 1);
     sem_init(&mutexBuffer2, 0, 1);
     sem_init(&mutexBuffer3, 0, 1);
+    sem_init(&mutexbufferSave, 0, 1);
+    sem_init(&mutexbufferWand, 0, 1);
 
     // Initializing buffers
-    Queue buffer1, buffer2, buffer3;
+    Queue buffer1, buffer2, buffer3, bufferSave, bufferWand;
     MagickWand *magick_wand;
     queueInitialize(&buffer1, sizeof(magick_wand));
     queueInitialize(&buffer2, sizeof(magick_wand));
     queueInitialize(&buffer3, sizeof(magick_wand));
+    queueInitialize(&bufferSave, sizeof(magick_wand));
+    queueInitialize(&bufferWand, sizeof(magick_wand));
 
     // Initialize GraphicsMagick API
     InitializeMagick(*argv);
@@ -209,20 +299,28 @@ int main(int argc, char *argv[])
     lA->argc = argc;
     lA->argv = argv;
     lA->buffer1 = &buffer1;
-    filterOneArgs *fA = malloc(sizeof(filterOneArgs));
-    fA->buffer1 = &buffer1;
-    fA->buffer2 = &buffer2;
+    filterOneArgs *f1A = malloc(sizeof(filterOneArgs));
+    f1A->buffer1 = &buffer1;
+    f1A->buffer2 = &buffer2;
+    filterTwoArgs *f2A = malloc(sizeof(filterOneArgs));
+    f2A->buffer2 = &buffer2;
+    f2A->buffer3 = &buffer3;
+    filterThreeArgs *f3A = malloc(sizeof(filterOneArgs));
+    f3A->buffer3 = &buffer3;
+    f3A->bufferSave = &bufferSave;
     saveArgs *sA      = malloc(sizeof(saveArgs));
-    sA->buffer2 = &buffer2;
-    sA->buffer3 = &buffer3;
+    sA->bufferSave = &bufferSave;
+    sA->bufferWand = &bufferWand;
     releaseArgs *rA   = malloc(sizeof(releaseArgs));
     rA->argc = argc;
-    rA->buffer3 = &buffer3;
+    rA->bufferWand = &bufferWand;
 
     // Initializing threads
-    pthread_t load, filter1, save, release; 
+    pthread_t load, filter1, filter2, filter3 ,save, release; 
     pthread_create(&load,    NULL, loadFiles, (void *)lA);
-    pthread_create(&filter1, NULL, filterOne, (void *)fA);
+    pthread_create(&filter1, NULL, filterOne, (void *)f1A);
+    pthread_create(&filter2, NULL, filterOne, (void *)f2A);
+    pthread_create(&filter3, NULL, filterOne, (void *)f3A);
     pthread_create(&save,    NULL, saveFiles, (void *)sA);
     pthread_create(&release, NULL, releaseWands, (void *)rA);
 
@@ -232,6 +330,10 @@ int main(int argc, char *argv[])
     if(rc) printf("failed to cancel the load thread\n");
     rc = pthread_cancel(filter1);
     if(rc) printf("failed to cancel the filter1 thread\n");
+    rc = pthread_cancel(filter2);
+    if(rc) printf("failed to cancel the filter2 thread\n");
+    rc = pthread_cancel(filter3);
+    if(rc) printf("failed to cancel the filter3 thread\n");
     rc = pthread_cancel(save);
     if(rc) printf("failed to cancel the save thread\n");
     
@@ -240,6 +342,8 @@ int main(int argc, char *argv[])
     clearQueue(&buffer1);
     clearQueue(&buffer2);
     clearQueue(&buffer3);
+    clearQueue(&bufferSave);
+    clearQueue(&bufferWand);
 
     // Destroy GraphicsMagick API
     DestroyMagick();
