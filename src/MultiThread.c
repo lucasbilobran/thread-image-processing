@@ -14,7 +14,9 @@
 #ifndef NUM_PARALEL_THREADS
     #define NUM_PARALEL_THREADS 2
 #endif
-#define BUFFER_MAX 30
+#ifndef BUFFER_MAX
+    #define BUFFER_MAX NUM_PARALEL_THREADS*2
+#endif
 
 sem_t mutexBuffer1;
 sem_t slotsbuff1;
@@ -303,9 +305,9 @@ int main(int argc, char *argv[])
     sem_init(&mutexBuffer3, 0, 1);
     sem_init(&mutexbufferSave, 0, 1);
     sem_init(&mutexbufferWand, 0, 1);
-    sem_init(&slotsbuff1, 0, NUM_PARALEL_THREADS);
-    sem_init(&slotsbuff2, 0, NUM_PARALEL_THREADS);
-    sem_init(&slotsbuff3, 0, NUM_PARALEL_THREADS);
+    sem_init(&slotsbuff1, 0, BUFFER_MAX);
+    sem_init(&slotsbuff2, 0, BUFFER_MAX);
+    sem_init(&slotsbuff3, 0, BUFFER_MAX);
     sem_init(&busybuff1, 0, 0);
     sem_init(&busybuff2, 0, 0);
     sem_init(&busybuff3, 0, 0);

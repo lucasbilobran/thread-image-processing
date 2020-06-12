@@ -62,16 +62,32 @@ cd ../build
 echo -e '\n\n\e[1m----- Cleaning and Compiling -----\e[0m'
 make clean && make
 
-title="Small Set (34 images) [1/3]"
-benchsuite="../images/smallset"
+title="Dummy Set (34 images in 1080p) [1/7]"
+benchsuite="../images/dummyset"
 benchmarksuite
 
-title="Medium Set (150 images) [2/3]"
-benchsuite="../images/mediumset"
+title="[1080p Test] Small Set (50 images in 1080p) [2/7]"
+benchsuite="../images/1080p/smallset"
 benchmarksuite
 
-title="Big Set (500 images) [3/3]"
-benchsuite="../images/bigset"
+title="[1080p Test] Medium Set (150 images in 1080p) [3/7]"
+benchsuite="../images/1080p/mediumset"
+benchmarksuite
+
+title="[1080p Test] Big Set (500 images in 1080p) [4/7]"
+benchsuite="../images/1080p/bigset"
+benchmarksuite
+
+title="[4K Test] Small Set (34 images) [5/7]"
+benchsuite="../images/4K/dummyset"
+benchmarksuite
+
+title="[4K Test] Medium Set (150 images in 4K) [6/7]"
+benchsuite="../images/4K/mediumset"
+benchmarksuite
+
+title="[4K Test] Big Set (500 images in 4K) [7/7]"
+benchsuite="../images/4K/bigset"
 benchmarksuite
 
 echo -e '\n\n\e[1m----- Benchmark Completed -----\e[0m\n'
