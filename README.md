@@ -1,13 +1,19 @@
-## Compiling
-gcc File.c -O `GraphicsMagickWand-config --cppflags --ldflags --libs`
-
-# Pré-processamento de Imagens 
+# Laboratório de CES-33: Pré-processamento de Imagens utilizando Threads
 
 Alunos:
-- Gianluigi Dal Toso
-- Lucas Alberto Bilobran Lema
+- Gianluigi Dal Toso [@gitoso](https://github.com/gitoso)
+- Lucas Alberto Bilobran Lema [@lucasbilobran](https://github.com/lucasbilobran)
 
-## Contextualizaço
+##  1. <a name='TabeladeContedos'></a>Tabela de Conteúdos
+
+* 1. [Tabela de Conteúdos](#TabeladeContedos)
+* 2. [Contextualização](#Contextualizao)
+* 3. [Tarefas propostas](#Tarefaspropostas)
+* 4. [Compilação & Execução](#CompilaoExecuo)
+* 5. [Execução dos benchmarks](#Execuodosbenchmarks)
+* 6. [Referências](#Referncias)
+
+##  2. <a name='Contextualizao'></a>Contextualização
 
 Com o avanço dos modelos de aprendizado de máquina,
 especialmente os baseados em redes neurais profundas,
@@ -42,7 +48,7 @@ se reduza o nı́vel de compressão e redimensionamento
 da imagem, podendo-se então trabalhar com imagens de
 qualidade e resolução superior.
 
-## Tarefas propostas
+##  3. <a name='Tarefaspropostas'></a>Tarefas propostas
 
 A tarefa proposta para o laboratório irá consistir de montar duas versões de um pipeline de threads cada
 qual realizando uma das tarefas de pré-processamento.
@@ -61,7 +67,16 @@ vidade de pré-processamento, neste caso aproveitando-se
 do paralelismo para acelerar a aplicação, porém existindo
 mais dificuldades para gerir o recurso compartilhado.
 
-### Referências
+##  4. <a name='CompilaoExecuo'></a>Compilação & Execução
+TODO
+```
+TODO
+```
+
+##  5. <a name='Execuodosbenchmarks'></a>Execução dos benchmarks
+TODO
+
+##  6. <a name='Referncias'></a>Referências
 [1]Prince Canuma “Image Pre-processing” em https://towardsdatascience.com/ [Online] Disponı́vel em: https://towardsdatascience.com/image-pre-processing-c1aec0be3edf
 
 [2] Krig, Scott. “Computer vision metrics.” Capı́tulo 2:Image Pre-Processing, 2016. [Online] Disponı́vel em: https://www.embedded-vision.com/sites/default/files/apress/computervision

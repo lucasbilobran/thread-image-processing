@@ -1,2 +1,2 @@
-# Output files
-Images processed by the filters pipeline will be placed here
+# Arquivos de output
+Os arquivos de __output__ gerados durante a execução do programa serão salvos neste diretório.
