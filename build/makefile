@@ -14,6 +14,9 @@ libqueue.a: queue.o
 queue.o: $(SRCDIR)/queue.c $(SRCDIR)/Queue.h
 	$(CC) -O -c $(SRCDIR)/queue.c
 
+multiThread: $(SRCDIR)/MultiThread.c libqueue.a
+	$(CC) -o MultiThread $(SRCDIR)/MultiThread.c -O $(CFLAGS) -L. -lqueue -lm
+
 simpleThread: $(SRCDIR)/SimpleThread.c libqueue.a
 	$(CC) -o SimpleThread $(SRCDIR)/SimpleThread.c -O $(CFLAGS) -L. -lqueue -lm
 

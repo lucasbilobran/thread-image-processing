@@ -11,6 +11,7 @@
 #include "Queue.h"
 
 #define OUTPUTDIR "../output"
+#define NUM_PARALEL_THREADS 2
 
 sem_t mutexBuffer1;
 sem_t mutexBuffer2;
@@ -316,24 +317,34 @@ int main(int argc, char *argv[])
     rA->bufferWand = &bufferWand;
 
     // Initializing threads
-    pthread_t load, filter1, filter2, filter3 ,save, release; 
+    pthread_t load, filter1[NUM_PARALEL_THREADS], 
+              filter2[NUM_PARALEL_THREADS], 
+              filter3[NUM_PARALEL_THREADS] ,
+              save, release; 
     pthread_create(&load,    NULL, loadFiles,   (void *)lA);
-    pthread_create(&filter1, NULL, filterOne,   (void *)f1A);
-    pthread_create(&filter2, NULL, filterTwo,   (void *)f2A);
-    pthread_create(&filter3, NULL, filterThree, (void *)f3A);
     pthread_create(&save,    NULL, saveFiles,   (void *)sA);
     pthread_create(&release, NULL, releaseWands,(void *)rA);
-
+    for (int i = 0; i < NUM_PARALEL_THREADS; i++)
+    {
+        pthread_create(&(filter1[i]), NULL, filterOne,   (void *)f1A);
+        pthread_create(&(filter2[i]), NULL, filterTwo,   (void *)f2A);
+        pthread_create(&(filter3[i]), NULL, filterThree, (void *)f3A);
+    }
+    
     // Wait fot the last thread to end and then exit the others
     pthread_join(release, NULL);
     int rc = pthread_cancel(load);
     if(rc) printf("failed to cancel the load thread\n");
-    rc = pthread_cancel(filter1);
-    if(rc) printf("failed to cancel the filter1 thread\n");
-    rc = pthread_cancel(filter2);
-    if(rc) printf("failed to cancel the filter2 thread\n");
-    rc = pthread_cancel(filter3);
-    if(rc) printf("failed to cancel the filter3 thread\n");
+
+    for (int i = 0; i < NUM_PARALEL_THREADS; i++)
+    {
+        rc = pthread_cancel(filter1[i]);
+        if(rc) printf("failed to cancel the filter1 thread\n");
+        rc = pthread_cancel(filter2[i]);
+        if(rc) printf("failed to cancel the filter2 thread\n");
+        rc = pthread_cancel(filter3[i]);
+        if(rc) printf("failed to cancel the filter3 thread\n");
+    }
     rc = pthread_cancel(save);
     if(rc) printf("failed to cancel the save thread\n");
     
