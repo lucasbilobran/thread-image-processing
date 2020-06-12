@@ -113,6 +113,7 @@ void *filterOne(void *f1A) {
             
         if(magick_wand != NULL)
         {
+            printf("Filtro 1\n");
             if( MagickEmbossImage(magick_wand, 0, 2) != MagickPass)
             {
                 dealWithError(magick_wand);
@@ -146,6 +147,7 @@ void *filterTwo(void *f2A) {
             
         if(magick_wand != NULL)
         {
+            printf("Filtro 2\n");
             if( MagickSolarizeImage(magick_wand, 0.2) != MagickPass)
             {
                 dealWithError(magick_wand);
@@ -182,6 +184,7 @@ void *filterThree(void *f3A) {
             
         if(magick_wand != NULL)
         {
+            printf("Filtro 3\n");
             if( MagickRotateImage(magick_wand,background,30) != MagickPass)
             {
                 dealWithError(magick_wand);
@@ -195,7 +198,7 @@ void *filterThree(void *f3A) {
                 sem_post(&mutexbufferSave);
             } 
         } 
-        
+
         magick_wand = NULL;
     }
 
@@ -317,12 +320,12 @@ int main(int argc, char *argv[])
 
     // Initializing threads
     pthread_t load, filter1, filter2, filter3 ,save, release; 
-    pthread_create(&load,    NULL, loadFiles, (void *)lA);
-    pthread_create(&filter1, NULL, filterOne, (void *)f1A);
-    pthread_create(&filter2, NULL, filterOne, (void *)f2A);
-    pthread_create(&filter3, NULL, filterOne, (void *)f3A);
-    pthread_create(&save,    NULL, saveFiles, (void *)sA);
-    pthread_create(&release, NULL, releaseWands, (void *)rA);
+    pthread_create(&load,    NULL, loadFiles,   (void *)lA);
+    pthread_create(&filter1, NULL, filterOne,   (void *)f1A);
+    pthread_create(&filter2, NULL, filterTwo,   (void *)f2A);
+    pthread_create(&filter3, NULL, filterThree, (void *)f3A);
+    pthread_create(&save,    NULL, saveFiles,   (void *)sA);
+    pthread_create(&release, NULL, releaseWands,(void *)rA);
 
     // Wait fot the last thread to end and then exit the others
     pthread_join(release, NULL);
