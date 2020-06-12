@@ -17,6 +17,30 @@ sem_t mutexBuffer2;
 sem_t mutexBuffer3;
 // MagickPassFail status = MagickPass;
 
+typedef struct LoadArgs
+{
+    int argc;
+    char **argv; 
+    Queue *buffer1;
+}loadArgs;
+
+typedef struct FilterOneArgs
+{
+    Queue *buffer1;
+    Queue *buffer2;
+}filterOneArgs;
+
+typedef struct SaveArgs
+{
+    Queue *buffer2;
+    Queue *buffer3;
+}saveArgs;
+
+typedef struct ReleaseArgs
+{
+    Queue *buffer3;
+}releaseArgs;
+
 void dealWithError(MagickWand *magick_wand) 
 {
     char *description;
@@ -27,7 +51,11 @@ void dealWithError(MagickWand *magick_wand)
     description, severity);
 }
 
-void *loadFiles(int argc, char *argv[], Queue *buffer1) {
+void *loadFiles(void *lA) {
+    int argc = ((loadArgs *)lA)->argc;
+    char **argv = ((loadArgs *)lA)->argv;
+    Queue *buffer1 = ((loadArgs *)lA)->buffer1; 
+
     MagickWand *magick_wand;
     const char *infile;
 
@@ -54,7 +82,10 @@ void *loadFiles(int argc, char *argv[], Queue *buffer1) {
     }
 }
 
-void *filterOne(Queue *buffer1, Queue *buffer2) {
+void *filterOne(void *fA) {
+    Queue *buffer1 = ((filterOneArgs *)fA)->buffer1;
+    Queue *buffer2 = ((filterOneArgs *)fA)->buffer2;  
+
     MagickWand *magick_wand = NULL;
 
     while(1) {
@@ -84,7 +115,10 @@ void *filterOne(Queue *buffer1, Queue *buffer2) {
     }
 }
 
-void *saveFiles(Queue *buffer2, Queue *buffer3) {
+void *saveFiles(void *sA) {
+    Queue *buffer2 = ((saveArgs *)sA)->buffer2;
+    Queue *buffer3 = ((saveArgs *)sA)->buffer3;  
+
     MagickWand *magick_wand = NULL;
     char outfile[512];
 
@@ -120,7 +154,9 @@ void *saveFiles(Queue *buffer2, Queue *buffer3) {
     }
 }
 
-void *releaseWands(Queue *buffer3){
+void *releaseWands(void *rA){
+    Queue *buffer3 = ((releaseArgs *)rA)->buffer3;  
+
     MagickWand *magick_wand = NULL;
     
     while(1) {
@@ -161,9 +197,26 @@ int main(int argc, char *argv[])
     // Initialize GraphicsMagick API
     InitializeMagick(*argv);
 
-    // Initializing threads
-    // pthread_create(&pombo, NULL, pomboFunction, NULL);
+    // Preparing args
+    loadArgs *lA = malloc(sizeof(loadArgs));
+    lA->argc = argc;
+    lA->argv = argv;
+    lA->buffer1 = &buffer1;
+    filterOneArgs *fA = malloc(sizeof(filterOneArgs));
+    fA->buffer1 = &buffer1;
+    fA->buffer2 = &buffer2;
+    saveArgs *sA      = malloc(sizeof(saveArgs));
+    sA->buffer2 = &buffer2;
+    sA->buffer3 = &buffer3;
+    releaseArgs *rA   = malloc(sizeof(releaseArgs));
+    rA->buffer3 = &buffer3;
 
+    // Initializing threads
+    pthread_t load, filter1, save, release; 
+    pthread_create(&load,    NULL, loadFiles, (void *)lA);
+    pthread_create(&filter1, NULL, filterOne, (void *)fA);
+    pthread_create(&save,    NULL, saveFiles, (void *)sA);
+    pthread_create(&release, NULL, releaseWands, (void *)rA);
     
     // Clean queues
     clearQueue(&buffer1);

@@ -5,8 +5,8 @@
 
 typedef struct Node
 {
-  void *data;
-  struct Node *next;
+    void *data;
+    struct Node *next;
 }node;
 
 typedef struct QueueList
