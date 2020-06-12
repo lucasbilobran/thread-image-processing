@@ -12,10 +12,17 @@
 
 #define OUTPUTDIR "../output"
 #define NUM_PARALEL_THREADS 2
+#define BUFFER_MAX 30
 
 sem_t mutexBuffer1;
+sem_t slotsbuff1;
+sem_t busybuff1;
 sem_t mutexBuffer2;
+sem_t slotsbuff2;
+sem_t busybuff2;
 sem_t mutexBuffer3;
+sem_t slotsbuff3;
+sem_t busybuff3;
 sem_t mutexbufferSave;
 sem_t mutexbufferWand;
 int total;
@@ -89,11 +96,13 @@ void *loadFiles(void *lA) {
         }
         else
         {
+            sem_wait(&slotsbuff1);
             // Entra na região crítica
             sem_wait(&mutexBuffer1);
             // Populate buffer 1
             enqueue(buffer1, &magick_wand);
             sem_post(&mutexBuffer1);
+            sem_post(&busybuff1);
         }
     }
 }
@@ -106,11 +115,13 @@ void *filterOne(void *f1A) {
 
     while(1) {
      
+        sem_wait(&busybuff1);
         // Entra na região crítica
         sem_wait(&mutexBuffer1);
         // Consume buffer 1
         dequeue(buffer1, &magick_wand);
         sem_post(&mutexBuffer1);
+        sem_post(&slotsbuff1);
             
         if(magick_wand != NULL)
         {
@@ -120,11 +131,13 @@ void *filterOne(void *f1A) {
             }
             else
             {
+                sem_wait(&slotsbuff2);
                 // Entra na região crítica
                 sem_wait(&mutexBuffer2);
                 // Populate buffer 2
                 enqueue(buffer2, &magick_wand);
                 sem_post(&mutexBuffer2);
+                sem_post(&busybuff2);
             } 
         } 
         magick_wand = NULL;
@@ -138,12 +151,14 @@ void *filterTwo(void *f2A) {
     MagickWand *magick_wand = NULL;
 
     while(1) {
-     
+        
+        sem_wait(&busybuff2);
         // Entra na região crítica
         sem_wait(&mutexBuffer2);
         // Consume buffer 2
         dequeue(buffer2, &magick_wand);
         sem_post(&mutexBuffer2);
+        sem_post(&slotsbuff2);
             
         if(magick_wand != NULL)
         {
@@ -153,11 +168,13 @@ void *filterTwo(void *f2A) {
             }
             else
             {
+                sem_wait(&slotsbuff3);
                 // Entra na região crítica
                 sem_wait(&mutexBuffer3);
                 // Populate buffer 3
                 enqueue(buffer3, &magick_wand);
                 sem_post(&mutexBuffer3);
+                sem_post(&busybuff3);
             } 
         } 
         magick_wand = NULL;
@@ -175,11 +192,13 @@ void *filterThree(void *f3A) {
 
     while(1) {
      
+        sem_wait(&busybuff3);
         // Entra na região crítica
         sem_wait(&mutexBuffer3);
         // Consume buffer 1
         dequeue(buffer3, &magick_wand);
         sem_post(&mutexBuffer3);
+        sem_post(&slotsbuff3);
             
         if(magick_wand != NULL)
         {
@@ -282,6 +301,12 @@ int main(int argc, char *argv[])
     sem_init(&mutexBuffer3, 0, 1);
     sem_init(&mutexbufferSave, 0, 1);
     sem_init(&mutexbufferWand, 0, 1);
+    sem_init(&slotsbuff1, 0, NUM_PARALEL_THREADS);
+    sem_init(&slotsbuff2, 0, NUM_PARALEL_THREADS);
+    sem_init(&slotsbuff3, 0, NUM_PARALEL_THREADS);
+    sem_init(&busybuff1, 0, 0);
+    sem_init(&busybuff2, 0, 0);
+    sem_init(&busybuff3, 0, 0);
 
     // Initializing buffers
     Queue buffer1, buffer2, buffer3, bufferSave, bufferWand;
