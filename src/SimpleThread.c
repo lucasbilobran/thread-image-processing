@@ -172,8 +172,9 @@ void *releaseWands(void *rA){
             DestroyMagickWand(magick_wand);
             total++;
         }
-        if (total == argc)
+        if (total == argc){
             break;
+        }
         magick_wand = NULL;
     }
 }
@@ -186,7 +187,7 @@ int main(int argc, char *argv[])
         fprintf(stderr,"Usage: %s: file1, file2, file3, ...\n", argv[0]);
         return 1;
     }
-    total = 0;
+    total = 1;
 
     // Initializing semaphores
     sem_init(&mutexBuffer1, 0, 1);
@@ -215,6 +216,7 @@ int main(int argc, char *argv[])
     sA->buffer2 = &buffer2;
     sA->buffer3 = &buffer3;
     releaseArgs *rA   = malloc(sizeof(releaseArgs));
+    rA->argc = argc;
     rA->buffer3 = &buffer3;
 
     // Initializing threads
