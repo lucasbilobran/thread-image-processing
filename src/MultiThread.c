@@ -11,7 +11,9 @@
 #include "Queue.h"
 
 #define OUTPUTDIR "../output"
-#define NUM_PARALEL_THREADS 2
+#ifndef NUM_PARALEL_THREADS
+    #define NUM_PARALEL_THREADS 2
+#endif
 #define BUFFER_MAX 30
 
 sem_t mutexBuffer1;
