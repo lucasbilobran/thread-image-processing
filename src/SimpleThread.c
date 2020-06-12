@@ -15,7 +15,7 @@
 sem_t mutexBuffer1;
 sem_t mutexBuffer2;
 sem_t mutexBuffer3;
-// MagickPassFail status = MagickPass;
+int total;
 
 typedef struct LoadArgs
 {
@@ -38,6 +38,7 @@ typedef struct SaveArgs
 
 typedef struct ReleaseArgs
 {
+    int argc;
     Queue *buffer3;
 }releaseArgs;
 
@@ -155,6 +156,7 @@ void *saveFiles(void *sA) {
 }
 
 void *releaseWands(void *rA){
+    int argc = ((releaseArgs *)rA)->argc;
     Queue *buffer3 = ((releaseArgs *)rA)->buffer3;  
 
     MagickWand *magick_wand = NULL;
@@ -166,9 +168,12 @@ void *releaseWands(void *rA){
             dequeue(buffer3, &magick_wand);
         sem_post(&mutexBuffer3);
         
-        if(magick_wand != NULL)
+        if(magick_wand != NULL){
             DestroyMagickWand(magick_wand);
-
+            total++;
+        }
+        if (total == argc)
+            break;
         magick_wand = NULL;
     }
 }
@@ -181,6 +186,7 @@ int main(int argc, char *argv[])
         fprintf(stderr,"Usage: %s: file1, file2, file3, ...\n", argv[0]);
         return 1;
     }
+    total = 0;
 
     // Initializing semaphores
     sem_init(&mutexBuffer1, 0, 1);
@@ -217,6 +223,16 @@ int main(int argc, char *argv[])
     pthread_create(&filter1, NULL, filterOne, (void *)fA);
     pthread_create(&save,    NULL, saveFiles, (void *)sA);
     pthread_create(&release, NULL, releaseWands, (void *)rA);
+
+    // Wait fot the last thread to end and then exit the others
+    pthread_join(release, NULL);
+    int rc = pthread_cancel(load);
+    if(rc) printf("failed to cancel the load thread\n");
+    rc = pthread_cancel(filter1);
+    if(rc) printf("failed to cancel the filter1 thread\n");
+    rc = pthread_cancel(save);
+    if(rc) printf("failed to cancel the save thread\n");
+    
     
     // Clean queues
     clearQueue(&buffer1);
