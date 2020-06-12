@@ -3,10 +3,7 @@ CFLAGS=`GraphicsMagickWand-config --cppflags --ldflags --libs`
 SRCDIR=../src
 OUTPUTDIR=../output
 
-all: $(SRCDIR)/Filters.c $(SRCDIR)/ResizeAllImages.c $(SRCDIR)/RotateAllImages.c
-	$(CC) -o Filters $(SRCDIR)/Filters.c -O $(CFLAGS)
-	$(CC) -o ResizeAllImages $(SRCDIR)/ResizeAllImages.c -O $(CFLAGS)
-	$(CC) -o RotateAllImages $(SRCDIR)/RotateAllImages.c -O $(CFLAGS)
+default: multiThread simpleThread sequential
 
 libqueue.a: queue.o 
 	ar rcs libqueue.a queue.o
@@ -33,4 +30,4 @@ rotate: $(SRCDIR)/RotateAllImages.c
 	$(CC) -o RotateAllImages $(SRCDIR)/RotateAllImages.c -O $(CFLAGS)
 
 clean:
-	rm Filters ResizeAllImages RotateAllImages $(OUTPUTDIR)/*.jpg
+	rm -f Filters ResizeAllImages RotateAllImages Sequential MultiThread SimpleThread $(OUTPUTDIR)/*.jpg *.o *.a
