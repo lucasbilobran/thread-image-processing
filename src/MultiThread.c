@@ -15,7 +15,7 @@
     #define NUM_PARALEL_THREADS 2
 #endif
 #ifndef BUFFER_MAX
-    #define BUFFER_MAX NUM_PARALEL_THREADS*2
+    #define BUFFER_MAX 1
 #endif
 
 sem_t mutexBuffer1;

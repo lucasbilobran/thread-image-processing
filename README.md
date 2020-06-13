@@ -68,15 +68,42 @@ do paralelismo para acelerar a aplicação, porém existindo
 mais dificuldades para gerir o recurso compartilhado.
 
 ##  4. <a name='CompilaoExecuo'></a>Compilação & Execução
-TODO
+Nesta seção será descrita como realizar a compilação em sistemas Linux para a distribuição Ubuntu. Para outras distribuições é possível realizar procedimento análogo.
+
+Antes de iniciar a compilação, deve-se instalar a biblioteca __GraphicsMagick__, que é uma dependência do projeto.
+
 ```
-TODO
+sudo apt install libgraphicsmagick1-dev
 ```
+
+Após instalada a dependência, basta compilar o projeto utilizando a ferramenta __Make__:
+
+```
+cd build/
+make
+```
+
+Estando o projeto compilado, basta executar os binários que foram criados pela compilação na pasta `build/` e passar como argumento os arquivos de imagem que deseja-se processar.
+
+Por exemplo:
+
+```
+./SimpleThread ../images/dummyset/*.jpg
+```
+
+Caso seja desejável, é possível acompanhar as imagens resultantes da execução do programa monitorando-se a pasta `output/`.
 
 ##  5. <a name='Execuodosbenchmarks'></a>Execução dos benchmarks
-TODO
+Os scripts de benchmark por padrão limpam os arquivos produto de qualquer execução anterior, realizam uma nova compilação limpa e em seguida executam uma bateria de testes para avaliar o laboratório implementado. 
+
+Existem duas variações do benchmark, uma mais enxuta (versão Lite) e outra mais completa. Mesmo a versão mais leve já pode ser bastante custosa para o sistema. Para executar os benchmarks:
+
+```
+cd benchmark/
+./benchmark-lite.sh
+```
 
 ##  6. <a name='Referncias'></a>Referências
-[1]Prince Canuma “Image Pre-processing” em https://towardsdatascience.com/ [Online] Disponı́vel em: https://towardsdatascience.com/image-pre-processing-c1aec0be3edf
+[1] Prince Canuma “Image Pre-processing” em https://towardsdatascience.com/ [Online] Disponı́vel em: https://towardsdatascience.com/image-pre-processing-c1aec0be3edf
 
 [2] Krig, Scott. “Computer vision metrics.” Capı́tulo 2:Image Pre-Processing, 2016. [Online] Disponı́vel em: https://www.embedded-vision.com/sites/default/files/apress/computervision

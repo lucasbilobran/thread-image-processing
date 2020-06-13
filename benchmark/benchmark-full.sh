@@ -79,7 +79,7 @@ benchsuite="../images/1080p/bigset"
 benchmarksuite
 
 title="[4K Test] Small Set (34 images) [5/7]"
-benchsuite="../images/4K/dummyset"
+benchsuite="../images/4K/smallset"
 benchmarksuite
 
 title="[4K Test] Medium Set (150 images in 4K) [6/7]"

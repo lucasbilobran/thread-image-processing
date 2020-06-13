@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Benchmark Configuration
-EXEC_PER_BENCH=3
+EXEC_PER_BENCH=5
 
 # Benchmark Function
 benchmark () {
